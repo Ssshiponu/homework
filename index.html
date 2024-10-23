@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Homework Submission</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -34,19 +34,103 @@
         </form>
 
         <h2>Submitted Homework</h2>
-        <ul id="homeworkList">
-            <!-- Submitted homework will be displayed here -->
-        </ul>
-        <div id="loadingMessage" style="display:none;">Loading homework...</div> <!-- Loading Message -->
-        <div id="errorMessage" style="color: red; display:none;"></div> <!-- Error Message -->
+        <ul id="homeworkList"></ul>
+        <div id="loadingMessage" style="display:none;">Loading homework...</div>
+        <div id="errorMessage" style="color: red; display:none;"></div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-storage.js"></script>
+    <!-- Firebase SDKs in module format -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-storage.js";
 
-    <!-- Your app's JavaScript -->
-    <script src="app.js"></script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCjboL8pJMcTgLClc8KCit7NMpVae-yCZI",
+            authDomain: "homework-9e71b.firebaseapp.com",
+            projectId: "homework-9e71b",
+            storageBucket: "homework-9e71b.appspot.com",
+            messagingSenderId: "157267925561",
+            appId: "1:157267925561:web:64e8e78bd6b6917cff4be8",
+            measurementId: "G-R2SL8K9RD9"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Handle form submission
+        document.getElementById('homeworkForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const subject = document.getElementById('subject').value;
+            const homeworkText = document.getElementById('homeworkText').value;
+            const fileInput = document.getElementById('homeworkFile');
+            const file = fileInput.files[0];
+            const loadingMessage = document.getElementById('loadingMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Show loading message
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            // Upload file to Firebase Storage
+            try {
+                const fileRef = ref(storage, `homework/${file.name}`);
+                await uploadBytes(fileRef, file);
+                const fileURL = await getDownloadURL(fileRef);
+
+                // Save homework to Firestore
+                await addDoc(collection(db, "homework"), {
+                    subject: subject,
+                    homework: homeworkText,
+                    fileURL: fileURL,
+                    timestamp: serverTimestamp()
+                });
+
+                // Clear form fields
+                document.getElementById('homeworkForm').reset();
+                loadingMessage.style.display = 'none';
+                alert('Homework submitted successfully!');
+                loadHomework(); // Reload the homework list
+            } catch (error) {
+                loadingMessage.style.display = 'none';
+                errorMessage.innerText = `Error adding homework: ${error.message}`;
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Function to load homework from Firestore
+        async function loadHomework() {
+            const homeworkList = document.getElementById('homeworkList');
+            homeworkList.innerHTML = ''; // Clear previous list
+
+            const loadingMessage = document.getElementById('loadingMessage');
+            loadingMessage.style.display = 'block'; // Show loading message
+
+            try {
+                const q = query(collection(db, "homework"), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                snapshot.forEach(doc => {
+                    const homeworkData = doc.data();
+                    const listItem = document.createElement('li'); // Changed to <li> for list consistency
+                    listItem.innerHTML = `<strong>${homeworkData.subject}</strong>: ${homeworkData.homework} <br/> <a href="${homeworkData.fileURL}" target="_blank">Download File</a>`;
+                    homeworkList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error("Error loading homework: ", error);
+            } finally {
+                loadingMessage.style.display = 'none'; // Hide loading message
+            }
+        }
+
+        // Load homework on page load
+        window.onload = function() {
+            loadHomework();
+        };
+    </script>
 </body>
 </html>
