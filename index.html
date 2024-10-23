@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework Submission</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Submit Homework</h1>
+
+        <!-- Homework Submission Form -->
+        <form id="homeworkForm">
+            <div class="form-group">
+                <label for="subject">Select Subject:</label>
+                <select id="subject" required>
+                    <option value="">--Choose a Subject--</option>
+                    <option value="Math">Math</option>
+                    <option value="Science">Science</option>
+                    <option value="History">History</option>
+                    <option value="English">English</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="homeworkText">Homework Details:</label>
+                <textarea id="homeworkText" placeholder="Enter homework details" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="homeworkFile">Upload Homework:</label>
+                <input type="file" id="homeworkFile" required />
+            </div>
+
+            <button type="submit">Submit Homework</button>
+        </form>
+
+        <h2>Submitted Homework</h2>
+        <ul id="homeworkList">
+            <!-- Submitted homework will be displayed here -->
+        </ul>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
