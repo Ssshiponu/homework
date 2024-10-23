@@ -4,48 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homework Submission</title>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="container">
         <h1>Submit Homework</h1>
+        <form id="homework-form">
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" required><br><br>
 
-        <!-- Homework Submission Form -->
-        <form id="homeworkForm">
-            <div class="form-group">
-                <label for="subject">Select Subject:</label>
-                <select id="subject" required>
-                    <option value="">--Choose a Subject--</option>
-                    <option value="Math">Math</option>
-                    <option value="Science">Science</option>
-                    <option value="History">History</option>
-                    <option value="English">English</option>
-                </select>
-            </div>
+            <label for="homework">Homework:</label>
+            <textarea id="homework" required></textarea><br><br>
 
-            <div class="form-group">
-                <label for="homeworkText">Homework Details:</label>
-                <textarea id="homeworkText" placeholder="Enter homework details" required></textarea>
-            </div>
+            <label for="studentName">Your Name:</label>
+            <input type="text" id="studentName" required><br><br>
 
-            <div class="form-group">
-                <label for="homeworkFile">Upload Homework:</label>
-                <input type="file" id="homeworkFile" required />
-            </div>
-
-            <button type="submit">Submit Homework</button>
+            <button type="submit">Submit</button>
         </form>
-
-        <h2>Submitted Homework</h2>
-        <ul id="homeworkList">
-            <!-- Submitted homework will be displayed here -->
-        </ul>
     </div>
+
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"></script>
 
-    <script src="app.js"></script>
-    
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCjboL8pJMcTgLClc8KCit7NMpVae-yCZI",
+            authDomain: "homework-9e71b.firebaseapp.com",
+            projectId: "homework-9e71b",
+            storageBucket: "homework-9e71b.appspot.com",
+            messagingSenderId: "157267925561",
+            appId: "1:157267925561:web:64e8e78bd6b6917cff4be8",
+            measurementId: "G-R2SL8K9RD9"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Form submission
+        const form = document.getElementById("homework-form");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            // Get form data
+            const subject = document.getElementById("subject").value;
+            const homework = document.getElementById("homework").value;
+            const studentName = document.getElementById("studentName").value;
+
+            // Create JSON object
+            const homeworkData = {
+                subject: subject,
+                homework: homework,
+                studentName: studentName,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                // Add data to Firestore
+                await db.collection("homework").add(homeworkData);
+
+                // Reset form and alert
+                form.reset();
+                alert("Homework submitted successfully!");
+            } catch (error) {
+                console.error("Error submitting homework:", error);
+                alert("Error submitting homework. Please try again.");
+            }
+        });
+    </script>
 </body>
 </html>
